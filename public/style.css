@@ -1,0 +1,31 @@
+nav {
+  background-color: #3d657c;
+  color: #fff;
+  padding: 30px 60px;
+  display: flex;
+  justify-content: space-between;
+}
+
+nav ul {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+nav li {
+  list-style: none;
+}
+nav li a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 5px 8px;
+}
+
+nav li a:hover {
+  color: rgb(255, 102, 0);
+  text-decoration: none;
+}
+.page {
+  font-size: 30px;
+  margin: 200px auto;
+}
