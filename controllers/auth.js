@@ -14,7 +14,11 @@ exports.register = (req, res) => {
   console.log(req.body);
 
   const { name, login, password, passwordConfirm } = req.body;
-
+  if (!login || !password) {
+    return res.status(400).render("register", {
+      message: "Поля незаполнены!",
+    });
+  }
   db.query(
     "select login from user where login = ?",
     [login],
@@ -25,11 +29,11 @@ exports.register = (req, res) => {
 
       if (results.length > 0) {
         return res.render("register", {
-          message: " That login is already in use",
+          message: " Данный пользователь уже зарегистрирован!",
         });
       } else if (password !== passwordConfirm) {
         return res.render("register", {
-          message: "Password do not match",
+          message: "Пароли не совпадают!",
         });
       }
 
@@ -44,11 +48,14 @@ exports.register = (req, res) => {
             console.log(error);
           } else {
             console.log(results);
-            return res.render("register", {
-              message: "User registered..!",
-            });
+            return (
+              res.render("register",
+              {
+                message: "User registered..!",
+                }),
+              res.status(200).redirect("/users")
+            );
           }
-          return getUsers;
         }
       );
     }
@@ -61,7 +68,7 @@ exports.login = async (req, res) => {
 
     if (!login || !password) {
       return res.status(400).render("login", {
-        message: "Please provide an login and password",
+        message: "Поля незаполнены!",
       });
     }
 
@@ -74,7 +81,7 @@ exports.login = async (req, res) => {
           !(await bcrypt.compare(password, results[0].password))
         ) {
           res.status(401).render("login", {
-            message: "login or password is incorrect",
+            message: "Логин или пароль введены не правильно!",
           });
         } else {
           var id = results[0].id;
@@ -91,7 +98,7 @@ exports.login = async (req, res) => {
           };
 
           res.cookie("jwt", token, cookieOptions);
-          res.status(200).redirect("/");
+          res.status(200).redirect("/users");
         }
       }
     );
@@ -100,7 +107,7 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.getUsers = async (req, res) => {
+exports.users = async (req, res) => {
   try {
     const token = req.cookies["jwt"];
     console.log(token);
@@ -112,21 +119,22 @@ exports.getUsers = async (req, res) => {
       }
       req.user = user;
       db.query("select * from user", async (error, results) => {
-        res.setHeader("Content-Type", "application/json");
         if (error) {
           res.end({});
         } else {
           const result = results.map((r) => {
             return { name: r.name, login: r.login };
           });
-          res.end(JSON.stringify(result));
+          res.render("users", {
+            users: result,
+          });
         }
       });
     });
   } catch (error) {
     console.log(error);
     res.status(500).end({
-      message: "Internal error",
+      message: "Внутренняя ошибка",
     });
   }
 };

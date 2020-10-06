@@ -1,5 +1,5 @@
 nav {
-  background-color: #3d657c;
+  background-color: #0c8383;
   color: #fff;
   padding: 30px 60px;
   display: flex;
@@ -22,10 +22,17 @@ nav li a {
 }
 
 nav li a:hover {
-  color: rgb(255, 102, 0);
+  color: rgb(0, 255, 13);
   text-decoration: none;
 }
 .page {
   font-size: 30px;
   margin: 200px auto;
+}
+.container p {
+  padding: 20px 10px 10px 20px;
+  font-weight: 900;
+}
+.users_row {
+  padding-left: 60px;
 }

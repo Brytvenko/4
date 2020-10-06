@@ -13,6 +13,6 @@ router.get("/login", (req, res) => {
   res.render("login");
 });
 
-router.get("/getUsers", authController.getUsers);
+router.get("/users", authController.users);
 
 module.exports = router;
