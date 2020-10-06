@@ -26,13 +26,18 @@ nav li a:hover {
   text-decoration: none;
 }
 .page {
-  font-size: 30px;
-  margin: 200px auto;
+  text-align: center;
+  font-size: 25px;
+  margin-top: 100px;
+}
+.container {
 }
 .container p {
   padding: 20px 10px 10px 20px;
   font-weight: 900;
 }
+
 .users_row {
-  padding-left: 60px;
+  display: flex;
+  justify-content: space-around;
 }

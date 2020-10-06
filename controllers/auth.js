@@ -10,7 +10,7 @@ const db = mysql.createConnection({
   database: process.env.DATABASE,
 });
 
-exports.register = (req, res) => {
+const register = async (req, res) => {
   console.log(req.body);
 
   const { name, login, password, passwordConfirm } = req.body;
@@ -48,13 +48,7 @@ exports.register = (req, res) => {
             console.log(error);
           } else {
             console.log(results);
-            return (
-              res.render("register",
-              {
-                message: "User registered..!",
-                }),
-              res.status(200).redirect("/users")
-            );
+            return loginUser(login, password, res);
           }
         }
       );
@@ -62,7 +56,37 @@ exports.register = (req, res) => {
   );
 };
 
-exports.login = async (req, res) => {
+const loginUser = async (login, password, res) => {
+  db.query(
+    "select * from user where login = ?",
+    [login],
+    async (error, results) => {
+      if (!results || !(await bcrypt.compare(password, results[0].password))) {
+        res.status(401).render("login", {
+          message: "Логин или пароль введены не правильно!",
+        });
+      } else {
+        var id = results[0].id;
+        var token = jwt.sign({ id }, process.env.JWT_SECRET, {
+          expiresIn: process.env.JWT_EXPIRES_IN,
+        });
+
+        console.log("The Token is : " + token);
+        var cookieOptions = {
+          expires: new Date(
+            Date.now() + process.env.JWT_COOKIE_EXPIRES * 24 * 60 * 60 * 1000
+          ),
+          httpOnly: true,
+        };
+
+        res.cookie("jwt", token, cookieOptions);
+        res.status(200).redirect("/users");
+      }
+    }
+  );
+};
+
+const login = async (req, res) => {
   try {
     const { login, password } = req.body;
 
@@ -70,44 +94,19 @@ exports.login = async (req, res) => {
       return res.status(400).render("login", {
         message: "Поля незаполнены!",
       });
+    } else {
+      res.status(401).render("login", {
+        message: "Пользователь не найден! Возможно Вы ввели неверные данные!",
+      });
     }
 
-    db.query(
-      "select * from user where login = ?",
-      [login],
-      async (error, results) => {
-        if (
-          !results ||
-          !(await bcrypt.compare(password, results[0].password))
-        ) {
-          res.status(401).render("login", {
-            message: "Логин или пароль введены не правильно!",
-          });
-        } else {
-          var id = results[0].id;
-          var token = jwt.sign({ id }, process.env.JWT_SECRET, {
-            expiresIn: process.env.JWT_EXPIRES_IN,
-          });
-
-          console.log("The Token is : " + token);
-          var cookieOptions = {
-            expires: new Date(
-              Date.now() + process.env.JWT_COOKIE_EXPIRES * 24 * 60 * 60 * 1000
-            ),
-            httpOnly: true,
-          };
-
-          res.cookie("jwt", token, cookieOptions);
-          res.status(200).redirect("/users");
-        }
-      }
-    );
+    await loginUser(login, password, res);
   } catch (error) {
     console.log(error);
   }
 };
 
-exports.users = async (req, res) => {
+const users = async (req, res) => {
   try {
     const token = req.cookies["jwt"];
     console.log(token);
@@ -138,3 +137,7 @@ exports.users = async (req, res) => {
     });
   }
 };
+
+exports.login = login;
+exports.users = users;
+exports.register = register;

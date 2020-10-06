@@ -12,7 +12,7 @@
 <body>
     <nav>
         <ul>
-
+            <li><a href="/">Начальная</a></li>
 
         </ul>
     </nav>
@@ -23,8 +23,8 @@
         <ul class="users">
             {{#each users}}
             <dl class="users_row">
-                <dd><span class="users_name"> Name: {{this.name}}</span> </dd>
-                <dd> <span class="users_login"> Login: {{this.login}}</span></dd>
+                <span class="users_name"> Name: {{this.name}}</span>
+                <span class="users_login"> Login: {{this.login}}</span>
             </dl>
 
             {{/each}}
